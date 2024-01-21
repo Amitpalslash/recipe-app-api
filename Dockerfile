@@ -1,0 +1,36 @@
+FROM python:3.9-alpine3.19
+
+LABEL maintainer="amitpalasansol"
+
+ENV PYTHONUNBUFFERED 1
+
+COPY ./requirement.txt /tmp/requirement.txt
+COPY ./requirement.dev.txt /tmp/requirement.dev.txt
+
+ARG DEV=false
+
+COPY ./app /app
+
+WORKDIR /app
+
+EXPOSE 8000
+
+RUN python -m venv /py && \
+    /py/bin/pip install --upgrade pip && \
+    /py/bin/pip install -r /tmp/requirement.txt && \
+    rm -rf /tmp && \
+    if [ $DEV = "true" ] ;  \
+     then  /py/bin/pip install -r /tmp/requirement.dev.txt ; \   
+    fi && \
+    adduser \
+       --disabled-password \
+       --no-create-home \
+       django-user
+
+ENV PATH="/py/bin:$PATH"
+
+
+
+
+USER django-user
+
